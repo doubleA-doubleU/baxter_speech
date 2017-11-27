@@ -32,32 +32,32 @@ def state_change(msg):
     state_pub = rospy.Publisher('state',String,queue_size=1) # define publisher
     # change state and image file based on predefined keywords
     if (msg.data=="baxter "):
-        file = "images/baxter.bmp"
+        file = "images/baxter.png"
         state = "listening"
     elif (msg.data=="learn "):
-        file = "images/learn.bmp"
+        file = "images/learn.png"
         state = "learning"
     elif (msg.data=="fetch "):
-        file = "images/fetch.bmp"
+        file = "images/fetch.png"
         state = "fetching"
     elif (msg.data=="sort "):
-        file = "images/sort.bmp"
+        file = "images/sort.png"
         state = "sorting"
     elif (msg.data=="sleep "):
-        file = "images/sleep.bmp"
+        file = "images/sleep.png"
         state = "sleeping"
     else:
         if (msg.data=="can "):
-            file = "images/can.bmp"
+            file = "images/can.png"
             state = "identifying"
         elif (msg.data=="bottle "):
-            file = "images/bottle.bmp"
+            file = "images/bottle.png"
             state = "identifying"
         elif (msg.data=="cube "):
-            file = "images/cube.bmp"
+            file = "images/cube.png"
             state = "identifying"
         else:
-            file = "images/error.bmp"
+            file = "images/error.png"
             state = "error"
     
     state_pub.publish(state) # publish the current state to the /baxter_speech/state topic
