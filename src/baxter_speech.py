@@ -34,32 +34,43 @@ def state_change(msg):
     if (msg.data=="baxter "):
         file = "images/baxter.png"
         state = "listening"
-    elif (msg.data=="learn "):
-        file = "images/learn.png"
-        state = "learning"
-    elif (msg.data=="fetch "):
-        file = "images/fetch.png"
-        state = "fetching"
-    elif (msg.data=="sort "):
-        file = "images/sort.png"
-        state = "sorting"
-    elif (msg.data=="sleep "):
-        file = "images/sleep.png"
-        state = "sleeping"
-    else:
+    if (state=="listening"):
+        if (msg.data=="baxter "):
+            file = "images/baxter.png"
+            state = "listening"
+        elif (msg.data=="learn "):
+            file = "images/learn.png"
+            state = "learning"
+        elif (msg.data=="fetch "):
+            file = "images/fetch.png"
+            state = "fetching"
+        elif (msg.data=="sort "):
+            file = "images/sort.png"
+            state = "sorting"
+        elif (msg.data=="sleep "):
+            file = "images/sleep.png"
+            state = "sleeping"
+    elif (state=="learning"):
         if (msg.data=="can "):
             file = "images/can.png"
-            state = "identifying"
+            state = "learn_can"
         elif (msg.data=="bottle "):
             file = "images/bottle.png"
-            state = "identifying"
+            state = "learn_bottle"
         elif (msg.data=="cube "):
             file = "images/cube.png"
-            state = "identifying"
-        else:
-            file = "images/error.png"
-            state = "error"
-    
+            state = "learn_cube"
+    elif (state=="fetching"):
+        if (msg.data=="can "):
+            file = "images/can.png"
+            state = "fetch_can"
+        elif (msg.data=="bottle "):
+            file = "images/bottle.png"
+            state = "fetch_bottle"
+        elif (msg.data=="cube "):
+            file = "images/cube.png"
+            state = "fetch_cube"
+        
     state_pub.publish(state) # publish the current state to the /baxter_speech/state topic
     
     BASE_DIR = os.path.join( os.path.dirname( __file__ ), '..' ) # base directory for this package
