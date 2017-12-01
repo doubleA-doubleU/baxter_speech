@@ -65,6 +65,9 @@ def state_change(msg):
             send_image(os.path.join(BASE_DIR,file)) # update image on Baxter's screen  
             go = 1
         
+    elif (go==0):
+        # 
+        
     elif (go==1): # only change states if other nodes have completed a phase
         # change state and image file based on predefined keywords    
         if (msg.data=="baxter "):
@@ -152,9 +155,10 @@ def state_change(msg):
         
 def next_state(msg):
     global go
-    go = 1
-    #if (msg.state==STATE_NEXT):
-        #go = 1
+    if (msg.state==STATE_FINISH):
+        go = 1
+    #if (msg.state==STATE_ERROR):
+        #go = 0
 
 def main():
     rospy.init_node('baxter_speech') # initialize node
