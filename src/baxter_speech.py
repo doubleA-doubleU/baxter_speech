@@ -59,7 +59,7 @@ def state_change(msg):
     if (go==-1):
         if (msg.data=="baxter "):
             state = STATE_INIT
-            time.sleep(1) # add a delay so the topic initial state can be published
+            time.sleep(0.5) # add a delay so the topic initial state can be published
             state_pub.publish(state) # publish the current state to the /inspector/state topic
             file = "images/init.png"
             send_image(os.path.join(BASE_DIR,file)) # update image on Baxter's screen  
@@ -152,8 +152,9 @@ def state_change(msg):
         
 def next_state(msg):
     global go
-    if (msg.state==STATE_NEXT):
-        go = 1
+    go = 1
+    #if (msg.state==STATE_NEXT):
+        #go = 1
 
 def main():
     rospy.init_node('baxter_speech') # initialize node
