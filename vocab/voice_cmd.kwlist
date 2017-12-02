@@ -5,5 +5,9 @@ FETCH /1e-1/
 CAN /1e-1/
 BOTTLE /1e-1/
 CUBE /1e-1/
+CUP /1e-1/
 SHUT DOWN /1e-1/
 EXIT /1e-1/
+STOP /1e-1/
+RESTART /1e-1/
+START /1e-1/

@@ -24,19 +24,19 @@ from std_msgs.msg import String
 from inspector.msg import ObjectName
 from inspector.msg import State
 
-# define the states
+# define constant values for the states
 STATE_INIT    = 0
 STATE_TRAIN   = 1
 STATE_SORT    = 2
 STATE_FETCH   = 3
 STATE_EXIT    = 4
 STATE_FINISH  = 5
-STATE_LISTEN  = 8
-STATE_NEXT    = 10
+STATE_LISTEN  = 6
     
+# global variables
 go = -1 # represents whether state changes are acceptable
-state = 0
-name = "unknown"
+state = STATE_INIT # initialize the state
+state_prev = STATE_INIT # for checking valid state transitions
 
 def send_image(path):
     img = cv2.imread(path) # use OpenCV to read the image file
@@ -45,121 +45,996 @@ def send_image(path):
     pub.publish(msg) # publish the image to Baxter's screen on the /robot/xdisplay topic
 
 def state_change(msg):  
+    # local copy of global variable
     global go
     global state
-    global name
+    global state_prev
 
     # define the publishers
     state_pub = rospy.Publisher('/inspector/state',State,queue_size=1)
     name_pub = rospy.Publisher('/inspector/naming',ObjectName,queue_size=1)
     
-    # base directory for this package
+    # define the base directory for this package
     BASE_DIR = os.path.join( os.path.dirname( __file__ ), '..' )
 
-    if (go==-1):
-        if (msg.data=="baxter "):
+    if (go==-1): # only occurs the first time through the loop
+        if (msg.data=="start "):
+            # update and publish state
             state = STATE_INIT
-            time.sleep(0.5) # add a delay so the topic initial state can be published
-            state_pub.publish(state) # publish the current state to the /inspector/state topic
+            time.sleep(0.5)
+            state_pub.publish(state)
+        
+            # update and publish display image
             file = "images/init.png"
-            send_image(os.path.join(BASE_DIR,file)) # update image on Baxter's screen  
-            go = 1
-        
-    elif (go==0):
-        # 
-        
-    elif (go==1): # only change states if other nodes have completed a phase
-        # change state and image file based on predefined keywords    
-        if (msg.data=="baxter "):
-            file = "images/baxter.png"
-            state = STATE_LISTEN
-            state_pub.publish(state) # publish the current state to the /inspector/state topic
-            send_image(os.path.join(BASE_DIR,file)) # update image on Baxter's screen
-        elif (state==STATE_LISTEN):
+            send_image(os.path.join(BASE_DIR,file))
+
+            # allow user to change states on next iteration of the callback
+            go = 1 
+    
+    elif (go==1): # only change states if other nodes have completed current phase
+        if (state_prev==STATE_INIT): # can only go to from INIT to TRAIN
             if (msg.data=="baxter "):
-                file = "images/baxter.png"
+                # update and publish state
                 state = STATE_LISTEN
-            elif (msg.data=="learn "):
-                file = "images/learn.png"
-                state = STATE_TRAIN
-            elif (msg.data=="fetch "):
-                file = "images/fetch.png"
-                state = STATE_FETCH
-            elif (msg.data=="sort "):
-                file = "images/sort.png"
-                state = STATE_SORT
-                go = 0
-            elif (msg.data=="shut down " or msg.data=="exit "):
-                file = "images/exit.png"
-                state = STATE_EXIT
-                go = 0
-            else:
-                file = "images/error.png"
+        
+                # update and publish display image
+                file = "images/baxter.png"
+                send_image(os.path.join(BASE_DIR,file))
+            
+            elif (state==STATE_LISTEN):
+                if (msg.data=="baxter "):
+                    # update and publish state
+                    state = STATE_LISTEN
+        
+                    # update and publish display image
+                    file = "images/baxter.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="learn "):
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/learn.png"
+                    send_image(os.path.join(BASE_DIR,file))
+
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+
+                else:
+                    # invalid state change request
+                    # update and publish display image
+                    file = "images/error_state.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+            elif (state==STATE_TRAIN):
+                if (msg.data=="bottle "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "bottle"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_bottle.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="can "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "can"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_can.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cube "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cube"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_cube.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cup "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cup"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_cup.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="learn "):                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    
+                    # update and publish display image
+                    file = "images/learn.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid object name
+                    # update and publish display image
+                    file = "images/error_name.png"
+                    send_image(os.path.join(BASE_DIR,file))
                 
-            state_pub.publish(state) # publish the current state to the /inspector/state topic
-            send_image(os.path.join(BASE_DIR,file)) # update image on Baxter's screen  
-            
-        elif (state==STATE_TRAIN):
-            if (msg.data=="can "):
-                file = "images/learn_can.png"
-                name = "can" 
-                go = 0
-            elif (msg.data=="bottle "):
-                file = "images/learn_bottle.png"
-                name = "bottle"
-                go = 0
-            elif (msg.data=="cube "):
-                file = "images/learn_cube.png"
-                name = "cube"
-                go = 0
-            elif (msg.data=="baxter "):
+        elif (state_prev==STATE_TRAIN): # can only go from TRAIN to SORT or FETCH
+            if (msg.data=="baxter "):
+                # update and publish state
+                state = STATE_LISTEN
+        
+                # update and publish display image
                 file = "images/baxter.png"
-                name = "unknown"
-            elif (msg.data=="learn "):
-                file = "images/learn.png"
-                name = "unknown"
-            else:
-                file = "images/error.png"
-                name = "unknown"
+                send_image(os.path.join(BASE_DIR,file))
             
-            state_pub.publish(state)
-            name_pub.publish(name) # publish the current object name to the /inspector/naming topic
-            send_image(os.path.join(BASE_DIR,file)) # update image on Baxter's screen
+            elif (state==STATE_LISTEN):                
+                if (msg.data=="baxter "):
+                    # update and publish state
+                    state = STATE_LISTEN
+        
+                    # update and publish display image
+                    file = "images/baxter.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="learn "):
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/learn.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="sort "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_SORT
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/sort.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="fetch "):
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/fetch.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:                    
+                    # invalid state change request
+                    # update and publish display image
+                    file = "images/error_state.png"
+                    send_image(os.path.join(BASE_DIR,file))
             
-        elif (state==STATE_FETCH):
-            if (msg.data=="can "):
-                file = "images/fetch_can.png"
-                name = "can"
-                go = 0
-            elif (msg.data=="bottle "):
-                file = "images/fetch_bottle.png"
-                name = "bottle"
-                go = 0
-            elif (msg.data=="cube "):
-                file = "images/fetch_cube.png"
-                name = "cube"
-                go = 0
-            elif (msg.data=="baxter "):
+            elif (state==STATE_TRAIN):
+                if (msg.data=="bottle "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "bottle"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_bottle.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="can "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "can"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_can.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cube "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cube"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_cube.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cup "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cup"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_cup.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                
+                elif (msg.data=="learn "):                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    
+                    # update and publish display image
+                    file = "images/learn.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid object name
+                    # update and publish display image
+                    file = "images/error_name.png"
+                    send_image(os.path.join(BASE_DIR,file)) 
+            
+            elif (state==STATE_SORT):
+                state_prev = state
+                
+            elif (state==STATE_FETCH):
+                if (msg.data=="bottle "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "bottle"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_bottle.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="can "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "can"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_can.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cube "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cube"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_cube.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cup "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cup"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_cup.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="fetch "):                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    
+                    # update and publish display image
+                    file = "images/fetch.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid object name
+                    # update and publish display image
+                    file = "images/error_name.png"
+                    send_image(os.path.join(BASE_DIR,file))     
+        
+        elif (state_prev==STATE_SORT):
+            if (msg.data=="baxter "):
+                # update and publish state
+                state = STATE_LISTEN
+        
+                # update and publish display image
                 file = "images/baxter.png"
-                name = "unknown"
-            elif (msg.data=="fetch "):
-                file = "images/fetch.png"
-                name = "unknown"
-            else:
-                file = "images/error.png"
-                name = "unknown"
+                send_image(os.path.join(BASE_DIR,file))
             
-            state_pub.publish(state)
-            name_pub.publish(name) # publish the current object name to the /inspector/naming topic
-            send_image(os.path.join(BASE_DIR,file)) # update image on Baxter's screen
+            elif (state==STATE_LISTEN):                
+                if (msg.data=="baxter "):
+                    # update and publish state
+                    state = STATE_LISTEN
+        
+                    # update and publish display image
+                    file = "images/baxter.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="learn "):
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/learn.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="sort "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_SORT
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/sort.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="fetch "):
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/fetch.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid state change request
+                    # update and publish display image
+                    file = "images/error_state.png"
+                    send_image(os.path.join(BASE_DIR,file))
+            
+            elif (state==STATE_TRAIN):
+                if (msg.data=="bottle "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "bottle"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_bottle.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="can "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "can"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_can.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cube "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cube"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_cube.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cup "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cup"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_cup.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="learn "):                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    
+                    # update and publish display image
+                    file = "images/learn.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid object name
+                    # update and publish display image
+                    file = "images/error_name.png"
+                    send_image(os.path.join(BASE_DIR,file)) 
+            
+            elif (state==STATE_SORT):
+                state_prev = state
+                
+            elif (state==STATE_FETCH):
+                if (msg.data=="bottle "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "bottle"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_bottle.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="can "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "can"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_can.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cube "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cube"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_cube.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cup "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cup"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_cup.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="fetch "):                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    
+                    # update and publish display image
+                    file = "images/fetch.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid object name
+                    # update and publish display image
+                    file = "images/error_name.png"
+                    send_image(os.path.join(BASE_DIR,file))
+        
+        elif (state_prev==STATE_FETCH):   
+            if (msg.data=="baxter "):
+                # update and publish state
+                state = STATE_LISTEN
+        
+                # update and publish display image
+                file = "images/baxter.png"
+                send_image(os.path.join(BASE_DIR,file))
+            
+            elif (state==STATE_LISTEN):                
+                if (msg.data=="baxter "):
+                    # update and publish state
+                    state = STATE_LISTEN
+        
+                    # update and publish display image
+                    file = "images/baxter.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="learn "):
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/learn.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="sort "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_SORT
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/sort.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="fetch "):
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+
+                    # update and publish display image
+                    file = "images/fetch.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid state change request
+                    # update and publish display image
+                    file = "images/error_state.png"
+                    send_image(os.path.join(BASE_DIR,file))
+            
+            elif (state==STATE_TRAIN):
+                if (msg.data=="bottle "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "bottle"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_bottle.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="can "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "can"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_can.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cube "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cube"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_cube.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cup "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cup"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/learn_cup.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="learn "):                    
+                    # update and publish state
+                    state = STATE_TRAIN
+                    state_pub.publish(state)
+                    
+                    # update and publish display image
+                    file = "images/learn.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid object name
+                    # update and publish display image
+                    file = "images/error_name.png"
+                    send_image(os.path.join(BASE_DIR,file)) 
+            
+            elif (state==STATE_SORT):
+                state_prev = state
+                
+            elif (state==STATE_FETCH):
+                if (msg.data=="bottle "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "bottle"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_bottle.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="can "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "can"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_can.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cube "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cube"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_cube.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="cup "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish name
+                    name = "cup"
+                    name_pub.publish(name)
+                    
+                    # update and publish display image
+                    file = "images/fetch_cup.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                
+                elif (msg.data=="fetch "):                    
+                    # update and publish state
+                    state = STATE_FETCH
+                    state_pub.publish(state)
+                    
+                    # update and publish display image
+                    file = "images/fetch.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    
+                elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
+                    # don't make further state changes until master allows it
+                    go = 0
+                    
+                    # update and publish state
+                    state = STATE_EXIT
+                    state_pub.publish(state)
+                    state_prev = state
+                    
+                    # update and publish display image
+                    file = "images/exit.png"
+                    send_image(os.path.join(BASE_DIR,file))
+                    time.sleep(3)
+                    
+                else:
+                    # invalid object name
+                    # update and publish display image
+                    file = "images/error_name.png"
+                    send_image(os.path.join(BASE_DIR,file))
+ 
+        elif (state_prev==STATE_EXIT):
+            if (msg.data=="start " or msg.data=="restart "):
+                # update and publish state
+                state = STATE_INIT
+                state_pub.publish(state)
+                state_prev = state
+
+                # update and publish display image
+                file = "images/init.png"
+                send_image(os.path.join(BASE_DIR,file))
+                time.sleep(3)
         
 def next_state(msg):
     global go
-    if (msg.state==STATE_FINISH):
-        go = 1
-    #if (msg.state==STATE_ERROR):
-        #go = 0
-
+    #if (msg.state==STATE_FINISH): # uncomment this and indent the line below to integrate with other nodes
+    go = 1
+        
 def main():
     rospy.init_node('baxter_speech') # initialize node
     rospy.Subscriber("/pocketsphinx_recognizer/output",String,state_change) # define subscriber
