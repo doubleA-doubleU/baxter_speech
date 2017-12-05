@@ -21,17 +21,16 @@ from sensor_msgs.msg import (
     Image,
 )
 from std_msgs.msg import String
-from inspector.msg import ObjectName
 from inspector.msg import State
 
 # define constant values for the states
-STATE_INIT    = 0
-STATE_TRAIN   = 1
-STATE_SORT    = 2
-STATE_FETCH   = 3
-STATE_EXIT    = 4
-STATE_STANDBY  = 5
-STATE_LISTEN  = 6
+STATE_INIT      = 0
+STATE_TRAIN     = 1
+STATE_SORT      = 2
+STATE_FETCH     = 3
+STATE_EXIT      = 4
+STATE_STANDBY   = 5
+STATE_LISTEN    = 6
     
 # global variables
 go = -1 # represents whether state changes are acceptable
@@ -52,7 +51,9 @@ def state_change(msg):
 
     # define the publishers
     state_pub = rospy.Publisher('/inspector/state',State,queue_size=1)
-    name_pub = rospy.Publisher('/inspector/naming',ObjectName,queue_size=1)
+    
+    ##### update all publish commands below #####
+    pub_msg = State()
     
     # define the base directory for this package
     BASE_DIR = os.path.join( os.path.dirname( __file__ ), '..' )
@@ -61,8 +62,11 @@ def state_change(msg):
         if (msg.data=="start "):
             # update and publish state
             state = STATE_INIT
+            pub_msg.state = state
+            pub_msg.name = ""
+            pub_msg.done = 0
             time.sleep(0.5)
-            state_pub.publish(state)
+            state_pub.publish(pub_msg)
         
             # update and publish display image
             file = "images/init.png"
@@ -93,7 +97,10 @@ def state_change(msg):
                 elif (msg.data=="learn "):
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/learn.png"
@@ -105,7 +112,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
 
                     # update and publish display image
@@ -126,12 +136,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "bottle"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "bottle"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/learn_bottle.png"
@@ -143,12 +152,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "can"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "can"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/learn_can.png"
@@ -160,12 +168,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cube"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cube"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/learn_cube.png"
@@ -177,12 +184,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cup"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cup"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/learn_cup.png"
@@ -191,7 +197,10 @@ def state_change(msg):
                 elif (msg.data=="learn "):                    
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/learn.png"
@@ -203,7 +212,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
 
                     # update and publish display image
@@ -238,7 +250,10 @@ def state_change(msg):
                 elif (msg.data=="learn "):
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/learn.png"
@@ -250,7 +265,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_SORT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/sort.png"
@@ -259,7 +277,10 @@ def state_change(msg):
                 elif (msg.data=="fetch "):
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/fetch.png"
@@ -271,7 +292,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
 
                     # update and publish display image
@@ -292,12 +316,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "bottle"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "bottle"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/learn_bottle.png"
@@ -309,12 +332,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "can"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "can"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/learn_can.png"
@@ -326,12 +348,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cube"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cube"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/learn_cube.png"
@@ -343,12 +364,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cup"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/learn_cup.png"
@@ -357,7 +377,10 @@ def state_change(msg):
                 elif (msg.data=="learn "):                    
                     # update and publish state
                     state = STATE_TRAIN
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/learn.png"
@@ -369,7 +392,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
                     
                     # update and publish display image
@@ -393,12 +419,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "bottle"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "bottle"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_bottle.png"
@@ -410,12 +435,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "can"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "can"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_can.png"
@@ -427,12 +451,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cube"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cube"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_cube.png"
@@ -444,12 +467,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cup"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cup"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_cup.png"
@@ -458,7 +480,10 @@ def state_change(msg):
                 elif (msg.data=="fetch "):                    
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/fetch.png"
@@ -466,7 +491,10 @@ def state_change(msg):
                 
                 elif (msg.data=="open "):                    
                     # update and publish state
-                    state_pub.publish(STATE_STANDBY)
+                    pub_msg.state = STATE_STANDBY
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     
                 elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
                     # don't make further state changes until master allows it
@@ -474,7 +502,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
                     
                     # update and publish display image
@@ -512,7 +543,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_SORT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/sort.png"
@@ -521,7 +555,10 @@ def state_change(msg):
                 elif (msg.data=="fetch "):
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/fetch.png"
@@ -533,7 +570,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
 
                     # update and publish display image
@@ -557,12 +597,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "bottle"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "bottle"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_bottle.png"
@@ -574,12 +613,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "can"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "can"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_can.png"
@@ -591,12 +629,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cube"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cube"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_cube.png"
@@ -608,12 +645,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cup"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cup"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_cup.png"
@@ -622,7 +658,10 @@ def state_change(msg):
                 elif (msg.data=="fetch "):                    
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/fetch.png"
@@ -630,7 +669,10 @@ def state_change(msg):
                     
                 elif (msg.data=="open "):                    
                     # update and publish state
-                    state_pub.publish(STATE_STANDBY)
+                    pub_msg.state = STATE_STANDBY
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     
                 elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
                     # don't make further state changes until master allows it
@@ -638,7 +680,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
                     
                     # update and publish display image
@@ -676,7 +721,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_SORT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/sort.png"
@@ -685,7 +733,10 @@ def state_change(msg):
                 elif (msg.data=="fetch "):
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/fetch.png"
@@ -697,7 +748,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
 
                     # update and publish display image
@@ -721,12 +775,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "bottle"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "bottle"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_bottle.png"
@@ -738,12 +791,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "can"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "can"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_can.png"
@@ -755,12 +807,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cube"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cube"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_cube.png"
@@ -772,12 +823,11 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = "cup"
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
-                    
-                    # update and publish name
-                    name = "cup"
-                    name_pub.publish(name)
                     
                     # update and publish display image
                     file = "images/fetch_cup.png"
@@ -786,7 +836,10 @@ def state_change(msg):
                 elif (msg.data=="fetch "):                    
                     # update and publish state
                     state = STATE_FETCH
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/fetch.png"
@@ -794,7 +847,10 @@ def state_change(msg):
                     
                 elif (msg.data=="open "):                    
                     # update and publish state
-                    state_pub.publish(STATE_STANDBY)
+                    pub_msg.state = STATE_STANDBY
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     
                 elif (msg.data=="shut down " or msg.data=="exit " or msg.data=="stop "):
                     # don't make further state changes until master allows it
@@ -802,7 +858,10 @@ def state_change(msg):
                     
                     # update and publish state
                     state = STATE_EXIT
-                    state_pub.publish(state)
+                    pub_msg.state = state
+                    pub_msg.name = ""
+                    pub_msg.done = 0
+                    state_pub.publish(pub_msg)
                     state_prev = state
                     
                     # update and publish display image
@@ -820,7 +879,10 @@ def state_change(msg):
             if (msg.data=="start " or msg.data=="restart "):
                 # update and publish state
                 state = STATE_INIT
-                state_pub.publish(state)
+                pub_msg.state = state
+                pub_msg.name = ""
+                pub_msg.done = 0
+                state_pub.publish(pub_msg)
                 state_prev = state
 
                 # update and publish display image
@@ -830,7 +892,7 @@ def state_change(msg):
         
 def next_state(msg):
     global go
-    if (msg.state==STATE_STANDBY):
+    if (msg.state==STATE_STANDBY or msg.done==1):
         go = 1
         
 def main():
