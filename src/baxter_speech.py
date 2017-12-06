@@ -97,10 +97,6 @@ def state_change(msg):
                 elif (msg.data=="learn "):
                     # update and publish state
                     state = STATE_TRAIN
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/learn.png"
@@ -197,10 +193,6 @@ def state_change(msg):
                 elif (msg.data=="learn "):                    
                     # update and publish state
                     state = STATE_TRAIN
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/learn.png"
@@ -250,10 +242,6 @@ def state_change(msg):
                 elif (msg.data=="learn "):
                     # update and publish state
                     state = STATE_TRAIN
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/learn.png"
@@ -277,10 +265,6 @@ def state_change(msg):
                 elif (msg.data=="fetch "):
                     # update and publish state
                     state = STATE_FETCH
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/fetch.png"
@@ -377,10 +361,6 @@ def state_change(msg):
                 elif (msg.data=="learn "):                    
                     # update and publish state
                     state = STATE_TRAIN
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/learn.png"
@@ -480,10 +460,6 @@ def state_change(msg):
                 elif (msg.data=="fetch "):                    
                     # update and publish state
                     state = STATE_FETCH
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/fetch.png"
@@ -555,10 +531,6 @@ def state_change(msg):
                 elif (msg.data=="fetch "):
                     # update and publish state
                     state = STATE_FETCH
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/fetch.png"
@@ -658,10 +630,6 @@ def state_change(msg):
                 elif (msg.data=="fetch "):                    
                     # update and publish state
                     state = STATE_FETCH
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/fetch.png"
@@ -733,10 +701,6 @@ def state_change(msg):
                 elif (msg.data=="fetch "):
                     # update and publish state
                     state = STATE_FETCH
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
 
                     # update and publish display image
                     file = "images/fetch.png"
@@ -836,10 +800,6 @@ def state_change(msg):
                 elif (msg.data=="fetch "):                    
                     # update and publish state
                     state = STATE_FETCH
-                    pub_msg.state = state
-                    pub_msg.name = ""
-                    pub_msg.done = 0
-                    state_pub.publish(pub_msg)
                     
                     # update and publish display image
                     file = "images/fetch.png"
